@@ -2,60 +2,31 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-executors:
-  ci-executor:
-    docker:
-      - image: githubtraining/ci-custom:latest
+
+# Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
+# See: https://circleci.com/docs/2.0/orb-intro/
+orbs:
+  ruby: circleci/ruby@1.4.0
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   build:
-    executor: ci-executor
+    docker:
+      - image: cimg/ruby:3.1.0
+    executor: ruby/default
     steps:
       - checkout
-
       - run:
-          name: build dependencies
-          command: bundle install
+          name: Which bundler?
+          command: bundle -v
+      - ruby/bundle-install
 
-      - run:
-          name: build the jekyll site
-          command: bundle exec jekyll build
-
-      - run:
-          name: notify build is finished
-          command: echo "The build is finished!"
-          
-  testlinks:
-    executor: ci-executor
-    steps:
-      - checkout
-
-      - run:
-          name: build dependencies
-          command: bundle install
-
-      - run:
-          name: build the jekyll site
-          command: bundle exec jekyll build
-
-      - run:
-          name: notify build is finished
-          command: echo "The build is finished!"
-
-      - run:
-          name: run html proofer
-          command: REPLACE-ME-WITH-SCRIPT
-
-      - run:
-          name: notify test is finished
-          command: echo "The test is completed!"
-
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  version: 2.1
-
-  build_and_test:
+  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
+    # Inside the workflow, you define the jobs you want to run.
     jobs:
       - build
-      - testlinks:
-          requires:
-            - build
 
